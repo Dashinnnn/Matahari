@@ -1,0 +1,97 @@
+.bold-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.name {
+  font-weight: 500;
+}
+
+h3,
+h4,
+h5 {
+  color: cadetblue;
+  font-weight: 700;
+}
+
+.information-card {
+  width: 500px;
+  border-radius: 30px;
+  background-color: rgb(236, 242, 242);
+  padding-right: 10px;
+  word-wrap: break-word;
+  overflow: hidden;
+  white-space: normal;
+}
+
+.parentCont {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.searchBox {
+  border: 2px solid cadetblue;
+  border-radius: 40px;
+  width: 350px;
+  margin-bottom: 10px;
+}
+
+.searchBox input {
+  padding-left: 15px;
+}
+
+.custom-header th {
+  background-color: cadetblue;
+  color: white;
+  padding: 10px;
+}
+
+.photo img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 0.5px solid black;
+}
+
+.addBtn {
+  width: 200px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: cadetblue;
+  color: white;
+}
+
+.inputField {
+  border: 2px solid cadetblue;
+  padding-left: 10px;
+  width: 400px;
+  margin-top: 10px;
+  border-radius: 30px;
+}
+
+.addBtn {
+  width: 150px;
+}
+
+.center {
+  display: flex;
+  min-height: 10vh;
+  justify-content: center;
+}
+
+.dataProfile {
+  font-size: 1.2rem;
+}
+
+.dropdown {
+  background-color: white;
+  width: 400px;
+  border-radius: 5px;
+  padding: 5px;
+  padding-left: 10px;
+}
