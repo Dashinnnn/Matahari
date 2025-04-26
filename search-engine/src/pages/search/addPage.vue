@@ -56,7 +56,7 @@
                 'Lumbang na Bata',
                 'Lumbang na Matanda',
                 'Madalunot',
-                'Makina,',
+                'Makina',
                 'Matipok',
                 'Munting Coral',
                 'Niyugan',
@@ -71,7 +71,7 @@
                 'Taklang Anak',
                 'Talisay',
                 'Tamayo',
-                'Timbain',
+                'Timbain'
               ]"
               label="Select Barangay"
               emit-value
@@ -138,7 +138,7 @@
             />
           </div>
 
-          <!--*PRECINT INPUT FIELD*-->
+          <!--*PRECINCT INPUT FIELD*-->
           <div class="q-pb-md">
             <label>Precinct</label>
             <q-input
@@ -192,7 +192,7 @@
               :options="[
                 'ERIC BUHAIN',
                 'LEANDRO LEGARDA LEVISTE',
-                'INCONCLUSIVE',
+                'INCONCLUSIVE'
               ]"
               label="Select congressman"
               emit-value
@@ -202,7 +202,7 @@
 
           <!--*INFLUENCE (FAMILY) INPUT FIELD*-->
           <div class="q-pb-md">
-            <label>Sphere of Infuence (Family)</label>
+            <label>Sphere of Influence (Family)</label>
             <q-input
               type="text"
               class="inputField"
@@ -216,7 +216,7 @@
 
           <!--*INFLUENCE (AFFILIATE) INPUT FIELD*-->
           <div class="q-pb-md">
-            <label>Sphere of Infuence (Affiliate)</label>
+            <label>Sphere of Influence (Affiliate)</label>
             <q-input
               type="text"
               class="inputField"
@@ -272,7 +272,8 @@
 </template>
 
 <script>
-import axios from "axios";
+import { api } from "boot/axios";
+
 export default {
   data() {
     return {
@@ -288,7 +289,7 @@ export default {
       remarks: "",
       photo: null,
       payroll: "",
-      congressman: "",
+      congressman: ""
     };
   },
 
@@ -300,7 +301,11 @@ export default {
         if (allowedTypes.includes(file.type)) {
           this.photo = file;
         } else {
-          alert("Invalid file type. Please upload a JPG or PNG image.");
+          this.$q.notify({
+            type: "negative",
+            message: "Invalid file type. Please upload a JPG or PNG image.",
+            position: "bottom-right"
+          });
         }
       }
     },
@@ -309,20 +314,23 @@ export default {
       if (
         !this.name.trim() ||
         !this.barangay.trim() ||
-        !this.designation.trim()
+        !this.designation.trim() ||
+        !this.congressman.trim()
       ) {
-        alert("Please fill out all required fields.");
+        this.$q.notify({
+          type: "negative",
+          message: "Please fill out all required fields.",
+          position: "bottom-right"
+        });
         return false;
       }
       return true;
     },
 
-    submitForm() {
+    async submitForm() {
       if (!this.validateForm()) {
         return;
       }
-
-      console.log("Payroll:", this.payroll);
 
       const formData = new FormData();
       formData.append("name", this.name || "");
@@ -336,34 +344,38 @@ export default {
       formData.append("sp_affiliate", this.spa || "");
       formData.append("remarks", this.remarks || "");
       formData.append("pt", this.pt || "");
-      formData.append("congressman", this.congressman || ""); // Fixed: was this.pt
+      formData.append("congressman", this.congressman || "");
 
       if (this.photo) {
         formData.append("photo", this.photo);
       }
 
-      axios
-        .post("http://localhost/searchEngine/api.php", formData, {
+      try {
+        const response = await api.post("/api.php", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          console.log("Response:", response.data);
-          this.$router.push({ name: "home" });
-          this.$q.notify({
-            type: "positive",
-            message: "Data added successfully!",
-            position: "bottom-right",
-          });
-        })
-        .catch((error) => {
-          console.error("Error adding data:", error);
-          if (error.response) {
-            console.error("Error response:", error.response.data); // Debug
+            Authorization: `Bearer ${localStorage.getItem("token")}`
           }
         });
+
+        console.log("Response:", response.data);
+        this.$q.notify({
+          type: "positive",
+          message: "Data added successfully!",
+          position: "bottom-right"
+        });
+        this.$router.push({ name: "home" });
+      } catch (error) {
+        console.error("Error adding data:", error);
+        this.$q.notify({
+          type: "negative",
+          message: "Failed to add data. Please try again.",
+          position: "bottom-right"
+        });
+        if (error.response) {
+          console.error("Error response:", error.response.data);
+        }
+      }
     },
 
     resetForm() {
@@ -379,8 +391,8 @@ export default {
       this.spa = "";
       this.photo = null;
       this.congressman = "";
-    },
-  },
+    }
+  }
 };
 </script>
 

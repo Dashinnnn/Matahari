@@ -1,24 +1,13 @@
 import { route } from "quasar/wrappers";
-import {
-  createRouter,
-  createMemoryHistory,
-  createWebHistory,
-  createWebHashHistory,
-} from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import routes from "./routes";
-import axios from "axios"; // Ensure axios is imported
+import { api } from "../boot/axios";
 
 export default route(function (/* { store, ssrContext } */) {
-  const createHistory = process.env.SERVER
-    ? createMemoryHistory
-    : process.env.VUE_ROUTER_MODE === "history"
-    ? createWebHistory
-    : createWebHashHistory;
-
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
-    history: createHistory(process.env.VUE_ROUTER_BASE),
+    history: createWebHistory(process.env.VUE_APP_ROUTER_MODE || "history")
   });
 
   Router.beforeEach(async (to, from, next) => {
@@ -30,17 +19,14 @@ export default route(function (/* { store, ssrContext } */) {
         next({ name: "loginPage" });
       } else {
         try {
-          const response = await axios.get(
-            "http://localhost/searchEngine/api.php?validate_token=true", // Use api.php for consistency
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+          const response = await api.get("/api.php?validate_token=true", {
+            headers: {
+              Authorization: `Bearer ${token}`
             }
-          );
+          });
 
           if (response.data.status === "success") {
-            next(); // Token is valid, proceed
+            next();
           } else {
             localStorage.removeItem("token");
             next({ name: "loginPage" });

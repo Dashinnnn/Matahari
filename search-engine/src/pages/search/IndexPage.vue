@@ -80,7 +80,7 @@
       </div>
     </div>
 
-    <div class="justify-start">
+    <div class="justify-start q-mt-lg">
       <q-table
         :rows="rows"
         :columns="columns"
@@ -117,7 +117,7 @@
 </template>
 
 <script>
-import { api } from "../../boot/axios";
+import { api } from "boot/axios";
 import _ from "lodash";
 
 export default {
@@ -131,22 +131,22 @@ export default {
           name: "barangay",
           label: "Barangay",
           field: "barangay",
-          align: "center",
+          align: "center"
         },
         {
           name: "designation",
           label: "Designation",
           field: "designation",
-          align: "center",
+          align: "center"
         },
         {
           name: "actions",
           label: "Actions",
           align: "center",
-          field: "actions",
-        },
+          field: "actions"
+        }
       ],
-      userRole: "",
+      userRole: ""
     };
   },
 
@@ -156,10 +156,10 @@ export default {
       console.log("Fetching data with query:", query);
 
       api
-        .get(query, {
+        .get(`/api.php${query}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
         })
         .then((response) => {
           if (
@@ -168,21 +168,27 @@ export default {
           ) {
             this.rows = response.data.data;
           } else {
-            console.error("Unexpected data format", response.data);
+            console.error("Unexpected data format:", response.data);
             this.rows = [];
+            this.$q.notify({
+              type: "negative",
+              message: "No data found.",
+              position: "bottom-right",
+              style: { fontSize: "18px", padding: "20px" }
+            });
           }
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
+          this.$q.notify({
+            type: "negative",
+            message: "Failed to fetch data. Please try again.",
+            position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" }
+          });
           if (error.response?.status === 401) {
             this.$router.push({ name: "loginPage" });
-            this.$q.notify({
-              type: "negative",
-              message: "Session expired. Please log in again.",
-              position: "bottom-right",
-            });
           }
-          this.rows = [];
         });
     }, 300),
 
@@ -190,7 +196,7 @@ export default {
       if (row && row.id) {
         this.$router.push(`/details/${row.id}`);
       } else {
-        console.error("ID not found in row", row);
+        console.error("ID not found in row:", row);
       }
     },
 
@@ -203,7 +209,7 @@ export default {
     },
 
     goToManage() {
-      this.$router.push({ name: "manage" });
+      this.$router.push({ name: "manageAccs" });
     },
 
     editRow(props) {
@@ -219,39 +225,46 @@ export default {
       this.$q
         .dialog({
           title: "Confirm",
-          message:
-            "Are you sure you want to move this item to the recycle bin?",
-          ok: {
-            label: "Yes",
-            color: "negative",
-          },
-          cancel: true,
+          message: "Are you sure you want to move this item to the recycle bin?",
+          ok: { label: "Yes", color: "negative" },
+          cancel: true
         })
         .onOk(() => {
           api
-            .put("http://localhost/searchEngine/softDelete.php", { id: row.id })
+            .put(
+              "/softDelete.php",
+              { id: row.id },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+              }
+            )
             .then((response) => {
               if (response.data.status === "success") {
                 this.fetchData();
                 this.$q.notify({
-                  color: "positive",
+                  type: "positive",
                   message: "Item moved to recycle bin successfully!",
                   position: "bottom-right",
+                  style: { fontSize: "18px", padding: "20px" }
                 });
               } else {
                 this.$q.notify({
-                  color: "negative",
-                  message: response.data.message || "Failed to move data!",
+                  type: "negative",
+                  message: response.data.message || "Failed to move item.",
                   position: "bottom-right",
+                  style: { fontSize: "18px", padding: "20px" }
                 });
               }
             })
             .catch((error) => {
-              console.error("Error deleting row:", error);
+              console.error("Error moving item:", error);
               this.$q.notify({
-                color: "negative",
-                message: "Failed to move data!",
+                type: "negative",
+                message: "Failed to move item.",
                 position: "bottom-right",
+                style: { fontSize: "18px", padding: "20px" }
               });
             });
         });
@@ -265,16 +278,16 @@ export default {
         type: "info",
         message: "Logged out successfully.",
         position: "bottom-right",
+        style: { fontSize: "18px", padding: "20px" }
       });
     },
 
     downloadExcel() {
-      window.open("http://localhost/searchEngine/ExportData.php", "_blank");
-    },
+      window.open(`${process.env.VUE_APP_API_URL}/exportData.php`, "_blank");
+    }
   },
 
   mounted() {
-    //localStorage.clear()
     const token = localStorage.getItem("token");
     const userRole = localStorage.getItem("role")?.trim();
 
@@ -297,12 +310,13 @@ export default {
         type: "warning",
         message: "Please log in to access this page.",
         position: "bottom-right",
+        style: { fontSize: "18px", padding: "20px" }
       });
       return;
     }
 
     this.fetchData();
-  },
+  }
 };
 </script>
 

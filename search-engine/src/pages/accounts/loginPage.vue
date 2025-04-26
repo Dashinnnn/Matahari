@@ -23,8 +23,10 @@
     </q-card>
   </q-page>
 </template>
+
 <script>
-import axios from "axios";
+import { api } from "boot/axios";
+
 export default {
   data() {
     return {
@@ -35,13 +37,10 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await this.$axios.post(
-          "http://localhost/searchEngine/login.php",
-          {
-            username: this.username,
-            password: this.password,
-          }
-        );
+        const response = await api.post("/login.php", {
+          username: this.username,
+          password: this.password,
+        });
 
         console.log("Login response: ", response.data);
 

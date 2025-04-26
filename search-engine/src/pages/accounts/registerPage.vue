@@ -25,8 +25,10 @@
     </q-card>
   </q-page>
 </template>
+
 <script>
-import axios from "axios";
+import { api } from "boot/axios";
+
 export default {
   data() {
     return {
@@ -37,34 +39,34 @@ export default {
     };
   },
   methods: {
-    register() {
-      axios
-        .post("http://localhost/searchEngine/register.php", {
+    async register() {
+      try {
+        const response = await api.post("/register.php", {
           fname: this.fname,
           lname: this.lname,
           username: this.username,
           password: this.password,
-        })
-        .then((response) => {
-          console.log("Response:", response.data);
-          if (response.data.success) {
-            this.$q.notify({
-              type: "positive",
-              message: "Registration successful! Please wait for verification.",
-              position: "bottom-right",
-            });
-            this.$router.push({ name: "loginPage" });
-          } else {
-            this.$q.notify({ type: "negative", message: "Register failed" });
-          }
-        })
-        .catch((error) => {
-          console.error("Registration Error:", error);
-          this.$q.notify({
-            type: "negative",
-            message: "An error occured during registration.",
-          });
         });
+
+        console.log("Response:", response.data);
+        if (response.data.success) {
+          this.$q.notify({
+            type: "positive",
+            message: "Registration successful! Please wait for verification.",
+            position: "bottom-right",
+          });
+          this.$router.push({ name: "loginPage" });
+        } else {
+          this.$q.notify({ type: "negative", message: "Register failed" });
+        }
+      } catch (error) {
+        console.error("Registration Error:", error);
+        this.$q.notify({
+          type: "negative",
+          message: "An error occurred during registration.",
+          position: "bottom-right",
+        });
+      }
     },
 
     goToLogin() {

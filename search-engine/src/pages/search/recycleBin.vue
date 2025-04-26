@@ -49,45 +49,45 @@
 </template>
 
 <script>
-import { api } from "../../boot/axios";
+import { api } from "boot/axios";
 
 export default {
   data() {
     return {
       rows: [],
       columns: [
-        { name: "id", label: "Ref No.", field: "id", align: "center" }, // Fixed typo: "lable" -> "label"
+        { name: "id", label: "Ref No.", field: "id", align: "center" },
         { name: "name", label: "Name", field: "name", align: "center" },
         {
           name: "barangay",
           label: "Barangay",
           field: "barangay",
-          align: "center",
+          align: "center"
         },
         {
           name: "designation",
           label: "Designation",
           field: "designation",
-          align: "center",
+          align: "center"
         },
         {
           name: "actions",
           label: "Actions",
           align: "center",
-          field: "actions",
-        },
-      ],
+          field: "actions"
+        }
+      ]
     };
   },
 
   methods: {
-    fetchRecycledBinData() {
+    fetchData() {
       const token = localStorage.getItem("token");
       api
-        .get("http://localhost/searchEngine/fetch_recycleBin.php", {
+        .get("/fetch_recycleBin.php", {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         })
         .then((response) => {
           if (response.data.status === "success") {
@@ -95,21 +95,23 @@ export default {
           } else {
             this.$q.notify({
               type: "negative",
-              message: "Failed to load data",
+              message: "Failed to load recycle bin data.",
               position: "bottom-right",
+              style: { fontSize: "18px", padding: "20px" }
             });
           }
         })
         .catch((error) => {
           console.error("Error fetching recycle bin data:", error);
+          this.$q.notify({
+            type: "negative",
+            message: "Failed to fetch recycle bin data.",
+            position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" }
+          });
           if (error.response && error.response.status === 401) {
             this.$router.push({ name: "loginPage" });
           }
-          this.$q.notify({
-            type: "negative",
-            message: "Error fetching data",
-            position: "bottom-right",
-          });
         });
     },
 
@@ -121,39 +123,42 @@ export default {
           message: "Are you sure you want to restore this item?",
           ok: {
             label: "Yes",
-            color: "positive",
+            color: "positive"
           },
-          cancel: true,
+          cancel: true
         })
         .onOk(() => {
           api
             .put(
-              "http://localhost/searchEngine/restore_row.php",
+              "/restore_row.php",
               { id: row.id },
               { headers: { Authorization: `Bearer ${token}` } }
             )
             .then((response) => {
               if (response.data.status === "success") {
-                this.fetchRecycledBinData(); // Fixed method name
+                this.fetchData();
                 this.$q.notify({
-                  color: "positive",
-                  message: "Item successfully restored!",
+                  type: "positive",
+                  message: "Item restored successfully!",
                   position: "bottom-right",
+                  style: { fontSize: "18px", padding: "20px" }
                 });
               } else {
                 this.$q.notify({
-                  color: "negative",
-                  message: response.data.message || "Failed to restore data!",
+                  type: "negative",
+                  message: response.data.message || "Failed to restore item.",
                   position: "bottom-right",
+                  style: { fontSize: "18px", padding: "20px" }
                 });
               }
             })
             .catch((error) => {
-              console.error("Error restoring row:", error);
+              console.error("Error restoring item:", error);
               this.$q.notify({
-                color: "negative",
-                message: "Failed to restore data!",
+                type: "negative",
+                message: "Failed to restore item.",
                 position: "bottom-right",
+                style: { fontSize: "18px", padding: "20px" }
               });
             });
         });
@@ -164,45 +169,52 @@ export default {
       this.$q
         .dialog({
           title: "Confirm",
-          message: "Are you sure you want to permanently delete this row?",
+          message: "Are you sure you want to permanently delete this item?",
           ok: {
             label: "Yes",
-            color: "negative",
+            color: "negative"
           },
-          cancel: true,
+          cancel: true
         })
         .onOk(() => {
           api
-            .delete(
-              `http://localhost/searchEngine/perma_delete.php?id=${row.id}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            )
+            .delete(`/perma_delete.php?id=${row.id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            })
             .then((response) => {
               if (response.data.status === "success") {
-                this.fetchRecycledBinData(); // Fixed method name
+                this.fetchData();
                 this.$q.notify({
-                  color: "positive",
-                  message: "Row deleted successfully!",
+                  type: "positive",
+                  message: "Item permanently deleted successfully!",
                   position: "bottom-right",
+                  style: { fontSize: "18px", padding: "20px" }
                 });
               } else {
                 this.$q.notify({
-                  color: "negative",
-                  message: response.data.message || "Failed to delete data!",
+                  type: "negative",
+                  message: response.data.message || "Failed to delete item.",
                   position: "bottom-right",
+                  style: { fontSize: "18px", padding: "20px" }
                 });
               }
             })
             .catch((error) => {
-              console.error("Error deleting row:", error);
+              console.error("Error deleting item:", error);
               this.$q.notify({
-                color: "negative",
-                message: "Failed to delete data!",
+                type: "negative",
+                message: "Failed to delete item.",
                 position: "bottom-right",
+                style: { fontSize: "18px", padding: "20px" }
               });
             });
         });
     },
+
+    goToDetails(evt, row) {
+      // Placeholder for row-click navigation (e.g., to DetailsPage)
+      console.log("Row clicked:", row.id);
+    }
   },
 
   mounted() {
@@ -210,9 +222,9 @@ export default {
     if (!token) {
       this.$router.push({ name: "loginPage" });
     } else {
-      this.fetchRecycledBinData();
+      this.fetchData();
     }
-  },
+  }
 };
 </script>
 

@@ -14,7 +14,7 @@
             <div class="center">
               <!-- PHOTO SECTION -->
               <div class="q-pb-md q-pl-lg q-pt-md photo" v-if="details.photo">
-                <img :src="details.photo" alt="A person's Photo" />
+                <img :src="`${process.env.VUE_APP_API_URL}${details.photo}`" alt="A person's Photo" />
               </div>
               <div class="q-pb-md q-pl-lg photo" v-else>
                 <span class="bold-text">Photo: No Photo Available</span>
@@ -26,7 +26,7 @@
             </div>
 
             <div class="q-pl-xl">
-              <!--DESGINATION SECTION-->
+              <!--DESIGNATION SECTION-->
               <div class="q-pb-md">
                 <span class="bold-text">Designation: </span>
                 <span class="dataProfile">{{
@@ -35,7 +35,7 @@
               </div>
               <!--BARANGAY SECTION-->
               <div class="q-pb-md">
-                <span class="bold-text">Baranagay: </span>
+                <span class="bold-text">Barangay: </span>
                 <span class="dataProfile">{{ details.barangay || "N/A" }}</span>
               </div>
               <!--AOR SECTION-->
@@ -59,7 +59,7 @@
                 <span class="dataProfile">{{ details.pt || "N/A" }}</span>
               </div>
 
-              <!--POLITICAL TENDENCY-->
+              <!--CONGRESSMAN-->
               <div class="q-pb-md">
                 <span class="bold-text">Congressman: </span>
                 <span class="dataProfile">{{
@@ -77,7 +77,7 @@
         </q-card>
       </div>
 
-      <!--SPHERE OF INFLUNCE (FAMILY) SECTION-->
+      <!--SPHERE OF INFLUENCE (FAMILY) SECTION-->
       <div class="center q-mt-md">
         <q-card class="information-card">
           <q-card-section>
@@ -92,7 +92,7 @@
         </q-card>
       </div>
 
-      <!--SPHERE OF INFLUNCE (FAMILY) SECTION-->
+      <!--SPHERE OF INFLUENCE (AFFILIATE) SECTION-->
       <div class="center q-mt-md">
         <q-card class="information-card">
           <q-card-section>
@@ -111,7 +111,7 @@
         </q-card>
       </div>
 
-      <!--SPHERE OF INFLUNCE (FAMILY) SECTION-->
+      <!--REMARKS SECTION-->
       <div class="center q-mt-md">
         <q-card class="information-card">
           <q-card-section>
@@ -144,7 +144,7 @@ export default {
       console.log("Fetching details for ID: ", id);
 
       api
-        .get(`?id=${id}`, {
+        .get(`/api.php?id=${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -158,17 +158,24 @@ export default {
             this.details = response.data.data[0];
           } else {
             console.error("No details found for ID: ", id);
+            this.$q.notify({
+              type: "negative",
+              message: "No details found for this record.",
+              position: "bottom-right",
+              style: { fontSize: "18px", padding: "20px" },
+            });
             this.details = {};
           }
         })
         .catch((error) => {
           console.error("Error fetching details:", error);
+          this.$q.notify({
+            type: "negative",
+            message: "Failed to fetch details. Please try again or log in.",
+            position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" },
+          });
           if (error.response && error.response.status === 401) {
-            this.$q.notify({
-              type: "negative",
-              message: "Session expired. Please log in again.",
-              position: "bottom-right",
-            });
             this.$router.push({ name: "loginPage" });
           }
         });

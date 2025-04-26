@@ -56,7 +56,7 @@
                 'Lumbang na Bata',
                 'Lumbang na Matanda',
                 'Madalunot',
-                'Makina,',
+                'Makina',
                 'Matipok',
                 'Munting Coral',
                 'Niyugan',
@@ -71,7 +71,7 @@
                 'Taklang Anak',
                 'Talisay',
                 'Tamayo',
-                'Timbain',
+                'Timbain'
               ]"
               label="Select Barangay"
               emit-value
@@ -88,7 +88,17 @@
               borderless
               hide-bottom-space
               v-model="designation"
-              :options="['P.O', 'LCO', 'TL-L1', 'TL-L2', 'POC-L1', 'POC-L2']"
+              :options="[
+                'P.O',
+                'LCO',
+                'TL-L1',
+                'TL-L2',
+                'POC-L1',
+                'POC-L2',
+                'ENFORCER',
+                'DEPUTY',
+                'SOCMED LEADER'
+              ]"
               label="Select Designation"
               emit-value
               map-options
@@ -170,7 +180,7 @@
             />
           </div>
 
-          <!--*CONGRESSMAN INPUT FIELD*-->
+          <!-- CONGRESSMAN INPUT FIELD -->
           <div class="q-pb-md">
             <label>Congressman <span>*</span></label>
             <q-select
@@ -182,7 +192,7 @@
               :options="[
                 'ERIC BUHAIN',
                 'LEANDRO LEGARDA LEVISTE',
-                'INCONCLUSIVE',
+                'INCONCLUSIVE'
               ]"
               label="Select congressman"
               emit-value
@@ -238,6 +248,7 @@
             v-model="photo"
             label="Upload Photo"
             accept="image/*"
+            :url="photoUrl"
             @added="onFileAdded"
             :auto-upload="false"
             hide-upload-button
@@ -262,7 +273,7 @@
 </template>
 
 <script>
-import { api } from "boot/axios"; 
+import { api } from "boot/axios";
 
 export default {
   data() {
@@ -280,6 +291,7 @@ export default {
       remarks: "",
       congressman: "",
       photo: null,
+      photoUrl: ""
     };
   },
 
@@ -294,8 +306,8 @@ export default {
   methods: {
     async loadData(id) {
       try {
-        const response = await api.get(`?id=${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        const response = await api.get(`/api.php?id=${id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         if (
           response.data.status === "success" &&
@@ -314,26 +326,43 @@ export default {
           this.spa = data.sp_affiliate;
           this.remarks = data.remarks;
           this.congressman = data.congressman;
-          this.photo = data.photo ? [{ name: data.photo, url: data.photo }] : null; 
+          this.photoUrl = data.photo ? `${process.env.VUE_APP_API_URL}${data.photo}` : "";
+          this.photo = data.photo ? [{ name: data.photo, url: this.photoUrl }] : null;
         } else {
-          console.error("No data found for the given ID");
+          this.$q.notify({
+            type: "negative",
+            message: "No data found for the given ID.",
+            position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" }
+          });
         }
       } catch (error) {
         console.error("Error loading data:", error);
+        this.$q.notify({
+          type: "negative",
+          message: "Failed to load data. Please try again or log in.",
+          position: "bottom-right",
+          style: { fontSize: "18px", padding: "20px" }
+        });
+        if (error.response && error.response.status === 401) {
+          this.$router.push({ name: "loginPage" });
+        }
       }
     },
 
     onFileAdded(files) {
       if (files.length > 0) {
         const file = files[0];
-        const allowedTypes = ["image/jpeg", "image/png"]; 
+        const allowedTypes = ["image/jpeg", "image/png"];
         if (allowedTypes.includes(file.type)) {
           this.photo = file;
+          this.photoUrl = "";
         } else {
           this.$q.notify({
             type: "negative",
-            message: "Invalid file type. Please upload a JPG or PNG image",
+            message: "Invalid file type. Please upload a JPG or PNG image.",
             position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" }
           });
           this.photo = null;
         }
@@ -344,12 +373,14 @@ export default {
       if (
         !this.name.trim() ||
         !this.barangay.trim() ||
-        !this.designation.trim()
+        !this.designation.trim() ||
+        !this.congressman.trim()
       ) {
         this.$q.notify({
           type: "negative",
           message: "Please fill out all required fields (marked with *).",
           position: "bottom-right",
+          style: { fontSize: "18px", padding: "20px" }
         });
         return false;
       }
@@ -364,6 +395,7 @@ export default {
           type: "negative",
           message: "No ID found for the update.",
           position: "bottom-right",
+          style: { fontSize: "18px", padding: "20px" }
         });
         return;
       }
@@ -378,7 +410,7 @@ export default {
       formData.append("name", this.name);
       formData.append("barangay", this.barangay);
       formData.append("designation", this.designation);
-      formData.append("payroll", this.payroll || "NO"); 
+      formData.append("payroll", this.payroll || "NO");
       formData.append("aor", this.aor || "");
       formData.append("precinct", this.precinct || "");
       formData.append("geopoint", this.geopoint || "");
@@ -388,42 +420,47 @@ export default {
       formData.append("remarks", this.remarks || "");
       formData.append("congressman", this.congressman || "");
 
-      // Append photo if a new file is selected
       if (this.photo && this.photo instanceof File) {
         formData.append("photo", this.photo);
       }
 
       try {
-        const response = await api.put("", formData, {
+        const response = await api.put("/api.php", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
         });
         if (response.data.status === "success") {
           this.$q.notify({
             type: "positive",
-            message: "Data updated successfully",
+            message: "Data updated successfully!",
             position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" }
           });
           this.$router.push({ name: "home" });
         } else {
           this.$q.notify({
             type: "negative",
-            message: response.data.message || "Error updating data",
+            message: response.data.message || "Error updating data.",
             position: "bottom-right",
+            style: { fontSize: "18px", padding: "20px" }
           });
         }
       } catch (error) {
-        console.error("Error occurred while updating the data:", error);
+        console.error("Error updating data:", error);
         this.$q.notify({
           type: "negative",
-          message: "Error occurred while updating the data",
+          message: "Failed to update data. Please try again.",
           position: "bottom-right",
+          style: { fontSize: "18px", padding: "20px" }
         });
+        if (error.response && error.response.status === 401) {
+          this.$router.push({ name: "loginPage" });
+        }
       }
-    },
-  },
+    }
+  }
 };
 </script>
 

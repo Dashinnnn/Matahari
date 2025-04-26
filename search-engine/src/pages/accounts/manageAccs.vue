@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import { api } from "../../boot/axios";
+import { api } from "boot/axios";
 
 export default {
   data() {
@@ -124,7 +124,7 @@ export default {
       const query = this.searchQuery ? `?q=${this.searchQuery}` : "";
 
       api
-        .get(`http://localhost/searchEngine/manageAcc.php${query}`, {
+        .get(`/manageAcc.php${query}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -157,12 +157,9 @@ export default {
         })
         .onOk(() => {
           api
-            .delete(
-              `http://localhost/searchEngine/deleteAcc.php?id=${row.id}`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            )
+            .delete(`/deleteAcc.php?id=${row.id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
             .then(() => {
               this.fetchData();
               this.$q.notify({
@@ -202,7 +199,7 @@ export default {
         .onOk(() => {
           api
             .put(
-              `http://localhost/searchEngine/verifyAcc.php`,
+              `/verifyAcc.php`,
               { id: row.id, verified: newStatus },
               { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -242,7 +239,7 @@ export default {
         .onOk(() => {
           api
             .put(
-              `http://localhost/searchEngine/levelSet.php`,
+              `/levelSet.php`,
               { id: row.id, level: newLevel },
               { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -268,6 +265,10 @@ export default {
         .onCancel(() => {
           this.fetchData();
         });
+    },
+
+    goToDetails(evt, row) {
+      // Placeholder for row-click navigation if needed
     },
   },
 
