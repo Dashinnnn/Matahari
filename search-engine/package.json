@@ -15,6 +15,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "@syncfusion/ej2-vue-splitbuttons": "^28.1.37",
+    "axios": "^1.9.0",
     "lodash": "^4.17.21",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",
