@@ -20,6 +20,14 @@
       "dest": "/$1"
     },
     {
+      "src": "/login.php",
+      "dest": "https://matahari-backend-e0beedf72643.herokuapp.com/login.php"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "https://matahari-backend-e0beedf72643.herokuapp.com/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
